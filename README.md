@@ -1,9 +1,12 @@
 ## Logseq Grammarly Plugin
 
-A plugin to toggle Grammarly inside LogSeq.
+A plugin to toggle Grammarly inside LogSeq. Enable/disable Grammarly suggestions by clicking the green bell icon.
+
+**Please press space to accept suggestions.**
+This is a temporary workaround since clicking the accept button will change the focus.
 
 ### Demo
-Enable/disable Grammarly suggestion inside LogSeq. Click the green-bell icon to toggle.
+
 ![demo](./demo.png)
 
 ### Running the Sample
@@ -14,6 +17,6 @@ Enable/disable Grammarly suggestion inside LogSeq. Click the green-bell icon to 
 - `Load unpacked plugin` in Logseq Desktop client.
 
 ### Configure
-Configurable suggestions inside LogSeq.
+Configurable suggestions in the plugin settings.
 ![config](./config.png)
 

@@ -2,6 +2,8 @@ import '@logseq/libs'
 import { LSPluginBaseInfo, SettingSchemaDesc } from '@logseq/libs/dist/LSPlugin'
 import * as Grammarly from "@grammarly/editor-sdk";
 
+const defaultGrammarlyClientId = 'client_4z3DAyDBBVi3x6yZTa6jaV'
+const oauthRedirectUri = 'logseq://grammarly-auth/'
 const header = '#logseq-grammarly'
 let grammarly = null;
 let enableGrammarly = false;
@@ -32,24 +34,28 @@ const callback = (mutationList, observer) => {
   if (!logseq.settings.GrammarlyClientID || !grammarly) return;
 
   for (let mutation of mutationList) {
-    // Left here for future variation
-    if (mutation.type == 'childList') {
-      continue;
-
     // Attaching editor plugin textarea in editing block.
     // They'll be grammarly-textarea after attaching.
-    } else if (mutation.type === 'attributes'
+    if (mutation.type === 'attributes'
                && mutation.target.nodeName === 'TEXTAREA'
-             && mutation.target.ariaLabel === 'editing block') {
-               console.log(header + ': Attaching Grammarly Editor');
+               && mutation.target.ariaLabel === 'editing block'
+               && mutation.target.parentNode.nodeName !== 'GRAMMARLY-EDITOR-PLUGIN'
+              ) {
+               let target = mutation.target
+               // console.log(header + ': Attaching Grammarly Editor to', target);
                grammarly.addPlugin(
-                 mutation.target,
+                 target,
                  { activation: "immediate",
                    documentDialect: logseq.settings.GrammarlyDocumentDialect,
                    documentDomain: logseq.settings.GrammarlyDocumentDomain,
                    autocomplete: logseq.settings.GrammarlyAutocomplete ? "on" : "off",
-                   toneDetector: logseq.settings.GrammarlyToneDetector ? "on" : "off" },
+                   toneDetector: logseq.settings.GrammarlyToneDetector ? "on" : "off",
+                   oauthRedirectUri: oauthRedirectUri
+                 },
                );
+               if(target.parentNode.nodeName !== 'GRAMMARLY-EDITOR-PLUGIN') continue;
+
+               target.parentElement.classList.add('ignore-outside-event')
              }
   }
 };
@@ -60,7 +66,7 @@ const settingsSchema: Array<SettingSchemaDesc> = [
     type: 'string',
     title: 'Grammarly Desktop Client ID',
     description: 'Please use the Desktop Client ID from Grammarly\'s API console',
-    default: 'client_4z3DAyDBBVi3x6yZTa6jaV'
+    default: defaultGrammarlyClientId
   },
   {
     key: "GrammarlyAutocomplete",
@@ -113,7 +119,6 @@ async function main (baseInfo: LSPluginBaseInfo) {
   observer.observe(watchTarget, {
     attributes: true,
     subtree: true,
-    //childList: true,
   });
 
   // Move the help-btn aside for grammarly button
